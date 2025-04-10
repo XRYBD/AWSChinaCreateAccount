@@ -1,6 +1,6 @@
 [
     {
-        "ParameterKey": "InitialS3BucketName",
+        "ParameterKey": "demo-test-initial-qlj",
         "ParameterValue": "Yourname-bootstrap-bucket"
     }, 
     {
@@ -16,7 +16,7 @@
         "ParameterValue": "DeployAccountLambda"
     },
     {
-        "ParameterKey": "ToolInstallS3Bucket",
+        "ParameterKey": "demo-test-qlj",
         "ParameterValue": "Yourname-lambda-zip-bucket"
     },    
     {
@@ -28,7 +28,7 @@
         "ParameterValue": "lambda_deploy_account.zip"
     },
     {
-        "ParameterKey": "SAMLMetadataS3BucketName",
+        "ParameterKey": "demo-test-samlmeta-qlj",
         "ParameterValue": "Yourname-saml-bucket"
     },
     {

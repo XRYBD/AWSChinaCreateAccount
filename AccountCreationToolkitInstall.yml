@@ -3,7 +3,7 @@ AWSTemplateFormatVersion: 2010-09-09
 Description: These templates create an account creation toolkit including two lambda functions, step functions, an S3 bucket that host SAML metadata, an S3 bucket that host bootstrap template running in member account, and an DynamoDB table that records account inventory.
 
 Parameters:
-  InitialS3BucketName:
+  demo-test-initial-qlj:
     Type: String
     Description: Name of S3 bucket that hosts account creation materials such as initial cloudformation templates, etc.
   InitialTemplateName:
@@ -18,7 +18,7 @@ Parameters:
     Type: String
     Description: Lambda function name that deploy bootstrap CFN in new account
     Default: 'DeployAccountLambda' 
-  ToolInstallS3Bucket:
+  demo-test-qlj:
     Type: String
     Description: Lambda Zip file storage s3 bucket
   CreateAccountLambdaZipFileName:
@@ -29,7 +29,7 @@ Parameters:
     Type: String
     Description: Full name of Deploy Account Lambda Zip file name (with .zip) in s3 bucket. 
     Default: 'lambda_deploy_account.zip'      
-  SAMLMetadataS3BucketName:
+  demo-test-samlmeta-qlj:
     Type: String
     Description: Name of S3 bucket that host SAML Federation Metadata file.
   ChildAccountDefaultRole:
@@ -56,7 +56,7 @@ Resources:
   LandingZoneInitialS3Bucket:
     Type: AWS::S3::Bucket
     Properties: 
-      BucketName: !Ref InitialS3BucketName
+      BucketName: !Ref demo-test-initial-qlj
       PublicAccessBlockConfiguration: 
         BlockPublicAcls: True
         BlockPublicPolicy: True
@@ -69,10 +69,10 @@ Resources:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
 
-  SAMLMetadataS3Bucket:
+  demo-test-samlmeta-qlj:
     Type: AWS::S3::Bucket
     Properties: 
-      BucketName: !Ref SAMLMetadataS3BucketName
+      BucketName: !Ref demo-test-samlmeta-qlj
       PublicAccessBlockConfiguration: 
         BlockPublicAcls: True
         BlockPublicPolicy: True
@@ -85,11 +85,11 @@ Resources:
           - ServerSideEncryptionByDefault:
               SSEAlgorithm: AES256
 
-  SAMLMetadataS3BucketPolicy:
+  demo-test-samlmeta-qljPolicy:
     Type: 'AWS::S3::BucketPolicy'
     Properties:
       Bucket:
-        Ref: SAMLMetadataS3Bucket
+        Ref: demo-test-samlmeta-qlj
       PolicyDocument:
         Version: "2012-10-17"
         Id: "SamlMetadataAccessPolicy"
@@ -102,7 +102,7 @@ Resources:
               'Fn::Join':
                 - ''
                 - - 'arn:aws-cn:s3:::'
-                  - Ref: SAMLMetadataS3BucketName
+                  - Ref: demo-test-samlmeta-qlj
                   - /*
             Principal: 
               AWS: '*'
@@ -158,7 +158,7 @@ Resources:
                   - s3:GetBucketPolicyStatus
                   - s3:PutBucketPolicy
                   - s3:GetBucketPolicy
-                Resource: !Sub 'arn:aws-cn:s3:::${SAMLMetadataS3BucketName}'
+                Resource: !Sub 'arn:aws-cn:s3:::${demo-test-samlmeta-qlj}'
               - Effect: Allow
                 Action:
                   - dynamodb:PutItem
@@ -184,9 +184,9 @@ Resources:
         Variables:
           access_to_billing: !Ref AccessToBilling
           account_role: !Ref ChildAccountDefaultRole
-          metadata_bucket_name: !Ref SAMLMetadataS3BucketName
+          metadata_bucket_name: !Ref demo-test-samlmeta-qlj
       Code:
-        S3Bucket: !Ref ToolInstallS3Bucket
+        S3Bucket: !Ref demo-test-qlj
         S3Key: !Ref CreateAccountLambdaZipFileName
       MemorySize: 128
 
@@ -226,7 +226,7 @@ Resources:
                   - sts:AssumeRole
                 Resource: 
                   - !Sub 'arn:aws-cn:iam::*:role/${ChildAccountDefaultRole}'
-                  - !Sub 'arn:aws-cn:s3:::${InitialS3BucketName}/${InitialTemplateName}'
+                  - !Sub 'arn:aws-cn:s3:::${demo-test-initial-qlj}/${InitialTemplateName}'
 
   DeployAccountLambda:
     Type: "AWS::Lambda::Function"
@@ -247,13 +247,13 @@ Resources:
       Environment:
         Variables:
           account_role: !Ref ChildAccountDefaultRole
-          bucket_name: !Ref InitialS3BucketName
-          metadata_bucket_name: !Ref SAMLMetadataS3BucketName
+          bucket_name: !Ref demo-test-initial-qlj
+          metadata_bucket_name: !Ref demo-test-samlmeta-qlj
           stack_name: !Ref CloudFormationStackName
           stack_region: !Ref CloudFormationStackRegion
           template_file: !Ref InitialTemplateName
       Code:
-        S3Bucket: !Ref ToolInstallS3Bucket
+        S3Bucket: !Ref demo-test-qlj
         S3Key: !Ref DeployAccountLambdaZipFileName
       MemorySize: 128
 
